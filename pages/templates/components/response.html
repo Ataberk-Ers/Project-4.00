@@ -1,0 +1,37 @@
+<blockquote id="{{response.id}}">
+  <p class="response-body">{{response.body}}</p>
+  <small class="response-author">by {{response.user.username}}</small>
+
+  {% if user.is_authenticated %}
+    <button class="reply-button" onclick="handleReplyButton({{response.id}})">Cevapla</button>
+  {% endif %}
+
+  <blockquote id="reply-form-container-{{response.id}}" class="reply-form-container">
+    <form method="POST" action="{% url 'reply' %}" class="reply-form">
+      {% csrf_token %}
+      <input type="hidden" name="question" value="{{question.id}}"/>
+      <input type="hidden" name="parent" value="{{response.id}}"/>
+      {{reply_form.body}}
+      <button type="button" class="reply-form-cancel-button" onclick="handleCancelReply({{response.id}})">İptal</button>
+      <input type="submit" class="reply-form-submit-button" value="Cevapla"/>
+    </form>
+  </blockquote>
+
+  <div class="response-likes">
+    <form method="POST" action="{% url 'like_response' response.id %}">
+      {% csrf_token %}
+      <button type="submit" class="reply-button {% if user in response.likes.all %}liked{% endif %}">
+        {% if user in response.likes.all %}
+          👍 Beğendin (<span>{{ response.total_likes }}</span>)
+        {% else %}
+          👍 Beğen (<span>{{ response.total_likes }}</span>)
+        {% endif %}
+      </button>
+    </form>
+  </div>
+
+  {% for children in response.get_responses %}
+  {% include 'components/response.html' with response=children %}
+  {% endfor %}
+
+</blockquote>

@@ -1,0 +1,92 @@
+{% extends 'layout.html' %}
+
+{% load planner_extras %}
+
+{% block css_files %}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .table.timetable-lg th,
+        .table.timetable-lg td {
+            font-size: 1.15rem;
+            padding: 1.1rem 0.7rem;
+            min-width: 70px;
+            height: 60px;
+            vertical-align: middle;
+        }
+        .table.timetable-lg th.table-light {
+            background-color: #f8f9fa;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>Ders Seç ve Çakışmaları Gör</h2>
+    <form method="get" class="mb-3">
+        <label for="course-select" class="form-label">Ders Ara ve Seç</label>
+        <select id="course-select" name="courses" multiple="multiple" class="form-control">
+            {% for course in courses %}
+                <option value="{{ course.id }}"
+                    {% if course.id in selected_ids %}selected{% endif %}>
+                    {{ course.title }}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary mt-2" type="submit">Tabloyu Göster</button>
+    </form>
+    {% if selected_courses %}
+        {% if has_conflict %}
+            <div class="alert alert-danger text-center mb-3" role="alert">
+                Dikkat! Seçtiğiniz derslerde zaman çakışması var.
+            </div>
+        {% endif %}
+        <div class="d-flex justify-content-center">
+            <table class="table table-bordered align-middle text-center timetable-lg" style="min-width: 900px;">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 120px;"></th>
+                        {% for hour in hours %}
+                            <th style="width: 80px;">{{ hour }}. Saat</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in days %}
+                    <tr>
+                        <th class="table-light" style="font-weight: bold;">{{ day.1 }}</th>
+                        {% for hour in hours %}
+                            {% with cell=timetable|get_item:day.0|get_item:forloop.counter0 %}
+                            <td
+                                {% if conflicts|get_item:day.0|get_item:forloop.counter0 %}
+                                    style="background-color:rgb(255, 91, 104); font-weight: bold;"
+                                {% elif cell %}
+                                    style="background-color: {{ course_colors|get_item:cell.0 }}; font-weight: bold;"
+                                {% endif %}
+                            >
+                                {% if cell %}
+                                    {{ cell|join:", " }}
+                                {% endif %}
+                            </td>
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block js_files %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#course-select').select2({
+                placeholder: "Ders ara ve seç",
+                width: '100%'
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,64 @@
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+        <a href="{% url 'index' %}" class="navbar-brand">Project 4.00 </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbar">
+
+            <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+                <a href="{% url 'index' %}" class="nav-link">Kurslar</a>
+            </li>
+            {% if user.is_superuser %}
+            <li class="nav-item">
+                <a href="{% url 'create_course' %}" class="nav-link">Kurs Ekle</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'course_list' %}" class="nav-link">Kursları düzenle</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{% url 'forum' %}" class="nav-link">Forumlar</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'planner' %}" class="nav-link">Course Planner</a>
+            </li>
+            </ul>
+
+            <ul class="navbar-nav me-3">
+
+                {% if user.is_authenticated %}
+
+                    <li class="nav-item">
+                        <a href="" class="nav-link">Hoşgeldin {{user.username}}</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'user_logout' %}" class="nav-link       text-danger">Çıkış</a>
+                    </li>
+                
+                {% else %}
+
+                <li class="nav-item">
+                    <a href="{% url 'user_login' %}" class="nav-link text-success">Giriş</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'user_register' %}" class="nav-link text-warning">Yeni kayıt</a>
+                </li>
+
+                {% endif %}
+
+            </ul>
+
+            <form class="d-flex" action="{% url 'search' %}">
+            <input class="form-control me-1" type="text" name="q" placeholder="Anahtar Kelime">
+            <button type="submit" class="btn btn-secondary">Arama</button>
+            </form>
+
+        </div>
+    </div>
+</nav>

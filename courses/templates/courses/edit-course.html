@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'courses/css/style.css' %}">
+{% endblock %}
+
+{% block page_title %}
+    Edit Course
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-12">
+                <form method="POST" novalidate enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Timetable Grid -->
+                    <div class="mb-3">
+                        <label class="form-label">Ders Zaman Tablosu</label>
+                        <table id="timetable-grid" class="table table-bordered text-center">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    {% for hour in hours %}
+                                        <th>{{ hour }}. Saat</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for day in days %}
+                                <tr>
+                                    <th>{{ day.1 }}</th>
+                                    {% for hour in hours %}
+                                        <td>
+                                            <input type="checkbox" class="timetable-checkbox" data-day="{{ day.0 }}" data-hour="{{ forloop.counter0 }}">
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- End Timetable Grid -->
+
+                    {% for field in form %}
+                        {% if field.name != "timetable" %}
+                        <div class="mb-3 {% if field.errors %} invalid {% endif %}">
+                            {% if field.errors %} <div class="alert alert-danger"> {{ field.errors }} </div> {% endif %}
+                            <label class="form-label" for="{{field.id_for_label}}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {{ form.timetable }} <!-- Hidden field -->
+
+                    <button class="btn btn-primary" type="submit">Kaydet</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_files %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Try to get initial timetable from the hidden field
+        let timetable = [];
+        try {
+            timetable = JSON.parse(document.getElementById('id_timetable').value);
+            if (!Array.isArray(timetable) || timetable.length !== 5) {
+                timetable = Array.from({length: 5}, () => Array(10).fill(0));
+            }
+        } catch {
+            timetable = Array.from({length: 5}, () => Array(10).fill(0));
+        }
+        const timetableField = document.getElementById('id_timetable');
+
+        // Set checkboxes according to timetable
+        document.querySelectorAll('.timetable-checkbox').forEach(cb => {
+            const day = parseInt(cb.dataset.day);
+            const hour = parseInt(cb.dataset.hour);
+            if (timetable[day][hour]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', function() {
+                timetable[day][hour] = this.checked ? 1 : 0;
+                timetableField.value = JSON.stringify(timetable);
+            });
+        });
+
+        // Update hidden field initially
+        timetableField.value = JSON.stringify(timetable);
+    });
+    </script>
+    <script src="{% static 'courses/js/script.js' %}"></script>
+{% endblock %}

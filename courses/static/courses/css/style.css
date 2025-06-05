@@ -1,0 +1,19 @@
+.errorlist {
+    list-style-type: none;
+    color: red;
+    margin: 0;
+    padding: 0;
+}
+
+.invalid input, .invalid textarea {
+    border-color: #dc3545;
+}
+
+.table.timetable-lg th,
+.table.timetable-lg td {
+    font-size: 1.3rem;
+    padding: 1.2rem 1.2rem;
+    min-width: 60px;
+    height: 60px;
+    vertical-align: middle;
+}

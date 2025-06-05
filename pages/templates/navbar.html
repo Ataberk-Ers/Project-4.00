@@ -1,0 +1,14 @@
+<nav class="navbar">
+  <div class="main-menu">
+    <ul>
+      <li><a href="{% url 'forum' %}">Sorular</a></li>
+    </ul>
+  </div>
+  <div class="user-menu">
+    <ul>
+      {% if user.is_authenticated %}
+      <li><a href="{% url 'new-question' %}">Soru sorun</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
