@@ -65,7 +65,6 @@
 {% block js_files %}
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 5 days, 10 hours
         let timetable = Array.from({length: 5}, () => Array(10).fill(0));
         const timetableField = document.getElementById('id_timetable');
 
@@ -82,7 +81,6 @@
             });
         });
 
-        // Set initial value
         updateField();
     });
     </script>

@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from courses.forms import CourseCreateForm, CourseEditForm, UploadForm
-from .models import Course, Category, UploadModel
+from .models import Course, Category, UploadModel, Exam, Enrollment, Grade
 from django.core.paginator import Paginator
 import random
 import os
@@ -165,3 +165,88 @@ def getCoursesByCategory(request, slug):
         'page_obj': page_obj,
         'seciliKategori': slug
     })
+
+@login_required
+def enroll_in_course(request, slug):
+    course = get_object_or_404(Course, slug=slug)
+    Enrollment.objects.get_or_create(student=request.user, course=course)
+    return redirect('course_details', slug=course.slug)
+
+def is_instructor(user):
+    return user.groups.filter(name='Instructor').exists()
+
+@login_required
+@user_passes_test(is_instructor)
+def assign_exam_grades(request):
+    courses = Course.objects.filter(instructor=request.user)
+    context = {
+        'courses': courses,
+    }
+    return render(request, 'courses/assign_exam_grades.html', context)
+
+@login_required
+@user_passes_test(is_instructor)
+def grade_course(request, slug):
+    course = get_object_or_404(Course, slug=slug, instructor=request.user)
+    enrollments = Enrollment.objects.filter(course=course)
+    exams = course.exams.all()
+
+    if request.method == "POST" and "delete_exam_id" in request.POST:
+        exam_id = request.POST.get("delete_exam_id")
+        exam = Exam.objects.filter(id=exam_id, course=course).first()
+        if exam:
+            exam.delete()
+        return redirect('grade_course', slug=course.slug)
+
+    if request.method == "POST" and "add_exam" in request.POST:
+        name = request.POST.get("exam_name")
+        weight = request.POST.get("exam_weight")
+        if name and weight:
+            Exam.objects.create(course=course, name=name, weight=weight)
+        return redirect('grade_course', slug=course.slug)
+
+    if request.method == "POST" and "save_grades" in request.POST:
+        for enrollment in enrollments:
+            for exam in exams:
+                field_name = f"grade_{enrollment.id}_{exam.id}"
+                score = request.POST.get(field_name)
+                if score is not None and score != "":
+                    grade_obj, created = Grade.objects.get_or_create(
+                        enrollment=enrollment, exam=exam,
+                        defaults={'score': score}
+                    )
+                    if not created:
+                        grade_obj.score = score
+                        grade_obj.save()
+        return redirect('grade_course', slug=course.slug)
+
+    context = {
+        'course': course,
+        'enrollments': enrollments,
+        'exams': exams,
+    }
+    return render(request, 'courses/grade_course.html', context)
+
+@login_required
+def grades(request):
+    enrollments = Enrollment.objects.filter(student=request.user)
+    context = {
+        'enrollments': enrollments,
+    }
+    return render(request, 'courses/grades.html', context)
+
+@login_required
+def student_course_grades(request, slug):
+    course = get_object_or_404(Course, slug=slug)
+    enrollment = get_object_or_404(Enrollment, course=course, student=request.user)
+    grades = enrollment.grades.select_related('exam')
+    exams = course.exams.all()
+    
+    weighted_sum = sum((grade.score * grade.exam.weight) for grade in grades)
+    average = weighted_sum / 100
+    context = {
+        'course': course,
+        'grades': grades,
+        'average': average,
+    }
+    return render(request, 'courses/student_course_grades.html', context)

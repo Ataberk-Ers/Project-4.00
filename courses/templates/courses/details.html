@@ -15,8 +15,11 @@
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-10">
-                <h1 class="h3 text-center">{{ course.title }} Kursu</h1>
-                <h5 class="text-center">Ders Zaman Tablosu</h5>
+                <h1 class="h3 text-center"><strong>{{ course.title }}</strong> Kursu</h1>
+                <h2 class="text-center">Ders Zaman Tablosu</h2>
+                {% if course.instructor %}
+                    <h3 class="h3 text-center"><strong>Öğretmen:</strong> {{ course.instructor.get_full_name|default:course.instructor.username }}</h3>
+                {% endif %}
                 <div class="d-flex justify-content-center">
                     <table class="table table-bordered table-striped align-middle text-center timetable-lg">
                         <thead>
@@ -45,6 +48,16 @@
                         </tbody>
                     </table>
                 </div>
+                {% if user.is_authenticated and user|if_in_group:"Student"%}
+                    {% if not course|is_enrolled:user %}
+                        <form action="{% url 'enroll_in_course' course.slug %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Kursa Kaydol</button>
+                        </form>
+                    {% else %}
+                        <p class="text-success">Bu kursa zaten kayıtlısınız.</p>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>

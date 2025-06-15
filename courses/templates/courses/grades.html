@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h3 class="text-center">My Grades</h3>
+            <ul class="list-group">
+                {% for enrollment in enrollments %}
+                    <li class="list-group-item text-center">
+                        <a href="{% url 'student_course_grades' enrollment.course.slug %}" class="btn btn-primary mb-2">
+                            {{ enrollment.course.title }}
+                        </a>
+                        <ul class="list-unstyled mt-2">
+                            {% for grade in enrollment.grades.all %}
+                                <li>
+                                    {{ grade.exam.name }} ({{ grade.exam.weight }}%): {{ grade.score }}
+                                </li>
+                            {% empty %}
+                                <li>No grades yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center">You are not enrolled in any courses.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

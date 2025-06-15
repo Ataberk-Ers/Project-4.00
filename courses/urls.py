@@ -13,4 +13,10 @@ urlpatterns = [
     path('upload', views.upload, name="upload_image"),
     path('<slug:slug>', views.details, name="course_details"),
     path('kategori/<slug:slug>', views.getCoursesByCategory, name='courses_by_category'),
+    path('<slug:slug>/enroll/', views.enroll_in_course, name='enroll_in_course'),
+    path('assign-exam-grades/', views.assign_exam_grades, name='assign_exam_grades'),
+    path('grade-course/<slug:slug>/', views.grade_course, name='grade_course'),
+    path('grades/', views.grades, name='grades'),
+    path('grades/<slug:slug>/', views.student_course_grades, name='student_course_grades'),
+    
 ]

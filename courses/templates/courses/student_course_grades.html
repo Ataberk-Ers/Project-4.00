@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h3>My Grades for {{ course.title }} Course</h3>
+            <ul class="list-group mb-3">
+                {% for grade in grades %}
+                    <li class="list-group-item">
+                        {{ grade.exam.name }} ({{ grade.exam.weight }}%): {{ grade.score }}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">No grades yet.</li>
+                {% endfor %}
+            </ul>
+            {% if average %}
+                <p><strong>Weighted Average:</strong> {{ average|floatformat:2 }}</p>
+            {% endif %}
+            <a href="{% url 'grades' %}" class="btn btn-secondary mt-2">Back to all courses</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

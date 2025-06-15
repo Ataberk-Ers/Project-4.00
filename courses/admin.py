@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Course,Category
+from .models import Course,Category, Enrollment
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
@@ -24,3 +24,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
     def course_count(self,obj):
         return obj.course_set.count()
+    
+@admin.register(Enrollment)
+class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ("student", "course", "date_enrolled")
+    search_fields = ("student__username", "course__title")
+    list_filter = ("course", "student")

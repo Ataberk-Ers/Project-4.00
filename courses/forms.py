@@ -15,7 +15,6 @@ class JSONListField(forms.CharField):
             return []
 
 
-
 class CourseCreateForm(forms.ModelForm):
     timetable = JSONListField(widget=HiddenInput(), required=False)
 
